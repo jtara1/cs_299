@@ -68,8 +68,32 @@ class TweetProcessor:
         # print(user_frame)
         return twitter_user, user_frame
 
+    def serialize(self, file_path='user_frames.json'):
+        json_data = {
+            twitter_user: frame.to_json()
+            for twitter_user, frame in self.user_frames.items()
+        }
+        print()
+
+        with open(file_path, 'w') as f:
+            json.dump(f, json_data)
+
+    def deserialize(self, file_path='user_frames.json'):
+        with open(file_path, 'r') as f:
+            json_data = json.load(f)
+
+        self.user_frames = {
+            twitter_user: frame.from_dict()
+            for twitter_user, frame in json_data.items()
+        }
+        
+
+class Query:
+    def __init__(self, user_frames):
+        pass
 
 if __name__ == '__main__':
     tp = TweetProcessor()
     tp.create_frames()
-    pprint(tp.user_frames)
+    # pprint(tp.user_frames)
+    tp.serialize()
