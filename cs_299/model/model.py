@@ -76,10 +76,9 @@ class TweetQuery(TweetProcessor):
         tp.create_frames()
 
     def get_most_frequent_words(self, twitter_user, limit=10):
-        val = self.user_frames[twitter_user].iloc[2, :]
+        series = self.user_frames[twitter_user].iloc[2, :]
 
-        # word_count = list(map(lambda x, y: x + y, val.values))
-        word_count = reduce(lambda x, y: x + y, val.values)
+        word_count = reduce(lambda x, y: x + y, series.values)
         return OrderedDict(word_count.most_common(limit))
 
 if __name__ == '__main__':
