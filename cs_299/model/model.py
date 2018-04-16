@@ -5,7 +5,8 @@ from glob import glob
 import os
 from os.path import basename, dirname, abspath, join
 import pandas as pd
-from collections import Counter
+from collections import Counter, OrderedDict
+from functools import reduce
 from multiprocessing import Pool
 
 
@@ -69,7 +70,22 @@ class TweetProcessor:
         return twitter_user, user_frame
 
 
+class TweetQuery(TweetProcessor):
+    def __init__(self, tweets_file_path='../scrape/twitter_data'):
+        super(TweetQuery, self).__init__(tweets_file_path)
+        tp.create_frames()
+
+    def get_most_frequent_words(self, twitter_user, limit=10):
+        val = self.user_frames[twitter_user].iloc[2, :]
+
+        # word_count = list(map(lambda x, y: x + y, val.values))
+        word_count = reduce(lambda x, y: x + y, val.values)
+        return OrderedDict(word_count.most_common(limit))
+
 if __name__ == '__main__':
-    tp = TweetProcessor()
+    # tp = TweetProcessor()
+    tp = TweetQuery()
     tp.create_frames()
-    pprint(tp.user_frames)
+    top_10_words = tp.get_most_frequent_words('realDonaldTrump')
+    print(top_10_words)
+    # pprint(tp.user_frames)
