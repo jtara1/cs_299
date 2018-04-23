@@ -1,3 +1,4 @@
+import re
 from pprint import pprint
 import time
 import json
@@ -11,7 +12,11 @@ from multiprocessing import Pool
 
 
 class TweetProcessor:
-    def __init__(self, tweets_file_path='../scrape/twitter_data'):
+    def __init__(self, tweets_file_path='../scrape/twitter_data',
+                 filtered_words=('the', '', 'be', 'to', 'of', 'and', 'a',
+                                 'in', 'that', 'i', 'have', 'her', 'his',
+                                 'for', 'not', 'on', 'with', 'he', 'as',
+                                 'you', 'do', 'at', 'this', 'but')):
         """Transforms a tweets in the form of JSON to be contained in a
         pandas.DataFrame
 
@@ -23,6 +28,7 @@ class TweetProcessor:
         """
 
         self.tweets_file_path = abspath(tweets_file_path)
+        self.filtered_words = filtered_words
         self.user_frames = {}
 
     def create_frames(self, processes=4):
@@ -44,8 +50,7 @@ class TweetProcessor:
                 self.create_frame_from_tweets,
                 list_of_files))
 
-    @staticmethod
-    def create_frame_from_tweets(tweets_file_path):
+    def create_frame_from_tweets(self, tweets_file_path):
         """Transform tweet data on a specific user and file into a
         pandas.DataFrame
 
@@ -59,11 +64,18 @@ class TweetProcessor:
         with open(tweets_file_path, 'r') as f:
             tweets = json.load(f)
 
-        # TODO: use regex to split by /s
-        # TODO: filter out insignificant words (the, a, there, be ...)
         for tweet_id in tweets:
-            tweets[tweet_id]['body'] = tweets[tweet_id]['body'].split(' ')
-            tweets[tweet_id]['word_count'] = Counter(tweets[tweet_id]['body'])
+            # remove whitespace characters and put each word in a list
+            words = re.split('\s', tweets[tweet_id]['body'])
+
+            # filter out insignificant words
+            words = list(
+                filter(
+                    lambda word: word.lower() not in self.filtered_words,
+                    words))
+
+            tweets[tweet_id]['body'] = words
+            tweets[tweet_id]['word_count'] = Counter(words)
 
         user_frame = pd.DataFrame(tweets)
         # print(user_frame)
@@ -72,19 +84,23 @@ class TweetProcessor:
 
 class TweetQuery(TweetProcessor):
     def __init__(self, tweets_file_path='../scrape/twitter_data'):
+        """Builds upon the TweetProcessor to provide methods to
+        query the data
+
+        :param tweets_file_path:
+        """
         super(TweetQuery, self).__init__(tweets_file_path)
-        tp.create_frames()
+        self.create_frames()
 
     def get_most_frequent_words(self, twitter_user, limit=10):
-        series = self.user_frames[twitter_user].iloc[2, :]
+        series = self.user_frames[twitter_user].loc['word_count']
 
         word_count = reduce(lambda x, y: x + y, series.values)
         return OrderedDict(word_count.most_common(limit))
 
 if __name__ == '__main__':
-    # tp = TweetProcessor()
+    # automatically loads tweet data and transforms into pd.DataFrame
     tp = TweetQuery()
-    tp.create_frames()
     top_10_words = tp.get_most_frequent_words('realDonaldTrump')
     print(top_10_words)
     # pprint(tp.user_frames)
