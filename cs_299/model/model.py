@@ -1,3 +1,6 @@
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+
 import re
 from pprint import pprint
 import time
@@ -10,13 +13,11 @@ from collections import Counter, OrderedDict
 from functools import reduce
 from multiprocessing import Pool
 
+stop_words = stopwords.words('english')
+
 
 class TweetProcessor:
-    def __init__(self, tweets_file_path='../scrape/twitter_data',
-                 filtered_words=('the', '', 'be', 'to', 'of', 'and', 'a',
-                                 'in', 'that', 'i', 'have', 'her', 'his',
-                                 'for', 'not', 'on', 'with', 'he', 'as',
-                                 'you', 'do', 'at', 'this', 'but')):
+    def __init__(self, tweets_file_path='../scrape/twitter_data'):
         """Transforms a tweets in the form of JSON to be contained in a
         pandas.DataFrame
 
@@ -28,7 +29,7 @@ class TweetProcessor:
         """
 
         self.tweets_file_path = abspath(tweets_file_path)
-        self.filtered_words = filtered_words
+        self.filtered_words = stop_words
         self.user_frames = {}
 
     def create_frames(self, processes=4):
@@ -66,19 +67,23 @@ class TweetProcessor:
 
         for tweet_id in tweets:
             # remove whitespace characters and put each word in a list
-            words = re.split('\s', tweets[tweet_id]['body'])
+            words = word_tokenize(tweets[tweet_id]['body'])
 
-            # filter out insignificant words
+            # make each word lowercase
+            words = [word.lower() for word in words]
+
+            # filter out insignificant words & words that aren't all
+            # alphabetical characters
             words = list(
                 filter(
-                    lambda word: word.lower() not in self.filtered_words,
+                    lambda word:
+                        word not in self.filtered_words and word.isalpha(),
                     words))
 
             tweets[tweet_id]['body'] = words
             tweets[tweet_id]['word_count'] = Counter(words)
 
         user_frame = pd.DataFrame(tweets)
-        # print(user_frame)
         return twitter_user, user_frame
 
 
