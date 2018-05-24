@@ -13,6 +13,8 @@ from collections import Counter, OrderedDict
 from functools import reduce
 from multiprocessing import Pool
 
+from cs_299.scrape.__main__ import download_tweets
+
 stop_words = stopwords.words('english')
 
 
@@ -29,7 +31,9 @@ class TweetProcessor:
         """
 
         self.tweets_file_path = abspath(tweets_file_path)
-        self.filtered_words = stop_words
+        self.filtered_words = stop_words + [
+            'https', 
+        ]
         self.user_frames = {}
 
     def create_frames(self, processes=4):
@@ -88,7 +92,7 @@ class TweetProcessor:
 
 
 class TweetQuery(TweetProcessor):
-    def __init__(self, tweets_file_path='../scrape/twitter_data'):
+    def __init__(self, tweets_file_path='./scrape/twitter_data'):
         """Builds upon the TweetProcessor to provide methods to
         query the data
 
@@ -98,10 +102,19 @@ class TweetQuery(TweetProcessor):
         self.create_frames()
 
     def get_most_frequent_words(self, twitter_user, limit=10):
-        series = self.user_frames[twitter_user].loc['word_count']
+        twitter_user = twitter_user.lower()
+
+        try:
+            series = self.user_frames[twitter_user].loc['word_count']
+        except KeyError:
+            path = download_tweets(twitter_user, self.tweets_file_path)
+            user, frame = self.create_frame_from_tweets(path)
+            self.user_frames[user] = frame
+            return self.get_most_frequent_words(twitter_user, limit)
 
         word_count = reduce(lambda x, y: x + y, series.values)
         return OrderedDict(word_count.most_common(limit))
+
 
 if __name__ == '__main__':
     # automatically loads tweet data and transforms into pd.DataFrame

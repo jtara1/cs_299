@@ -3,6 +3,7 @@ import json
 from cs_299.twitter_api_keys import *
 import os
 from os.path import join, dirname, basename
+import pathlib
 
 
 def download_tweets(screen_name, output_directory='twitter_data'):
@@ -20,17 +21,23 @@ def download_tweets(screen_name, output_directory='twitter_data'):
 
     alltweets.extend(new_tweets)
 
-    outtweets = [
+    outtweets = {
+        tweet.id:
         {
             "body": tweet.text.decode('utf-8') if isinstance(tweet.text, bytes)
             else tweet.text
         }
         for tweet in alltweets
-    ]
+    }
 
-    with open(join(output_directory, '{}.json'.format(screen_name.lower())), 'w') as outfile:
+    file_path = join(output_directory, '{}.json'.format(screen_name.lower()))
+    pathlib.Path(dirname(file_path)).mkdir(parents=True, exist_ok=True)
+
+    with open(file_path, 'w') as outfile:
         json.dump(outtweets, outfile)
+
+    return file_path
 
 
 if __name__ == '__main__':
-    download_tweets('realdonaldtrump')
+    download_tweets('realDonaldTrump')

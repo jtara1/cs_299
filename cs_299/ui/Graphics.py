@@ -29,7 +29,7 @@ def main():
     panel = tk.Label(win, image=img)
     panel.grid(column=0, row=2)
 
-    but= ttk.Button(win, text="click", command=lambda: clicked(name.get(), panel))
+    but = ttk.Button(win, text="click", command=lambda: clicked(name.get(), panel))
     but.grid(column=1, row=1)
 
     win.mainloop()
@@ -38,24 +38,25 @@ def main():
 def clicked(user, pan):
     global tweet_query
     print(user)
-    wordCount = tweet_query.get_most_frequent_words(user, 5)
-    print(wordCount)
-    makeGraph(wordCount)
+    if user:
+        wordCount = tweet_query.get_most_frequent_words(user, 5)
+        print(wordCount)
+        make_graph(wordCount)
 
-    imgUpdate = ImageTk.PhotoImage(Image.open("wordCountRELOAD.jpg"))
+    imgUpdate = ImageTk.PhotoImage(Image.open("wordCountRELOAD.png"))
     pan.configure(image=imgUpdate)
     pan.image = imgUpdate
 
 
-def makeGraph(dic):
+def make_graph(dic):
     s = pd.Series(dic)
-    s=s.sort_values(ascending=False)
+    s = s.sort_values(ascending=False)
     print(s)
 
     ax = s.iloc[:len(dic)].plot(kind="barh")
     ax.invert_yaxis()
 
-    plt.savefig('wordCountRELOAD.jpg', bbox_inches='tight')
+    plt.savefig('wordCountRELOAD.png', bbox_inches='tight')
     plt.clf()
 
 
