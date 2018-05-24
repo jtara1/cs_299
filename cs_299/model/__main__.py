@@ -32,7 +32,7 @@ class TweetProcessor:
 
         self.tweets_file_path = abspath(tweets_file_path)
         self.filtered_words = stop_words + [
-            'https', 
+            'https',
         ]
         self.user_frames = {}
 
