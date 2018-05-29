@@ -34,6 +34,11 @@ class TweetProcessor:
         self.filtered_words = stop_words + [
             'https',
         ]
+        self.filtered_words += [
+            '!', ':', ',', '-', 'https', '/', '\u2026', "'s", "n't",
+            '#', '.', ';', ')', '(', "'re", '&', '?', '%', '@', "'",
+            '...', 'http',
+        ]
         self.user_frames = {}
 
     def create_frames(self, processes=4):
