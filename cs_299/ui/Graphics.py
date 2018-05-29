@@ -45,7 +45,8 @@ def clicked(user, pan):
         print(wordCount)
         make_graph(wordCount)
 
-    imgUpdate = ImageTk.PhotoImage(Image.open("wordCountRELOAD.png"))
+    img_path = join(dirname(__file__), 'wordCountRELOAD.png')
+    imgUpdate = ImageTk.PhotoImage(Image.open(img_path))
     pan.configure(image=imgUpdate)
     pan.image = imgUpdate
 
@@ -58,7 +59,8 @@ def make_graph(dic):
     ax = s.iloc[:len(dic)].plot(kind="barh")
     ax.invert_yaxis()
 
-    plt.savefig('wordCountRELOAD.png', bbox_inches='tight')
+    img_path = join(dirname(__file__), 'wordCountRELOAD.png')
+    plt.savefig(img_path, bbox_inches='tight')
     plt.clf()
 
 
