@@ -6,7 +6,8 @@ import matplotlib.pyplot as plt
 plt.rcdefaults()
 from PIL import Image, ImageTk
 import pandas as pd
-
+import os
+from os.path import dirname, join, abspath, basename
 from cs_299.model import TweetQuery
 tweet_query = TweetQuery()
 
@@ -25,7 +26,8 @@ def main():
     entry.grid(column=0, row=1)
 
     """Image making"""
-    img = ImageTk.PhotoImage(Image.open("wordCount.png"))
+    img_path = join(dirname(__file__), 'wordCount.png')
+    img = ImageTk.PhotoImage(Image.open(img_path))
     panel = tk.Label(win, image=img)
     panel.grid(column=0, row=2)
 
