@@ -37,7 +37,7 @@ class TweetProcessor:
         self.filtered_words += [
             '!', ':', ',', '-', 'https', '/', '\u2026', "'s", "n't",
             '#', '.', ';', ')', '(', "'re", '&', '?', '%', '@', "'",
-            '...', 'http',
+            '...', 'http', 'nt', 'rt',
         ]
         self.user_frames = {}
 
